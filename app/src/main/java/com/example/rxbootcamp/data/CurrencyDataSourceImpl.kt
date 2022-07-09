@@ -11,7 +11,9 @@ class CurrencyDataSourceImpl @Inject constructor(
 
     override fun getAvailableBooks(): Single<List<Currency>> =
         currencyService.getAvailableBooks().map {
-            it.currencies.toCurrenciesViewData()
+            it.currencies.toCurrenciesViewData().filter { currency ->
+                currency.book.contains("_mxn")
+            }
         }
 
     override fun getCurrencyTicker(book: String): Single<Ticker> =
