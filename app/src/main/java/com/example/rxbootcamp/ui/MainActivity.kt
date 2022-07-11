@@ -2,12 +2,13 @@ package com.example.rxbootcamp.ui
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.rxbootcamp.R
 import com.example.rxbootcamp.databinding.ActivityMainBinding
+import com.example.rxbootcamp.ui.model.Currency
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -17,8 +18,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
 
     private val viewModel : MainViewModel by viewModels()
-    private val adapter : BookAdapter by lazy {
-        BookAdapter()
+    private val adapter : CurrencyAdapter by lazy {
+        CurrencyAdapter { currency ->
+            currencyClickListener(currency)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,14 +37,14 @@ class MainActivity : AppCompatActivity() {
         binding.rvBooks.adapter = adapter
     }
 
+
+    private fun currencyClickListener(currency : Currency){
+        Toast.makeText(this, currency.bookName,Toast.LENGTH_SHORT).show()
+    }
+
     private fun setObservers() {
         lifecycleScope.launch{
-            // repeatOnLifecycle launches the block in a new coroutine every time the
-            // lifecycle is in the STARTED state (or above) and cancels it when it's STOPPED.
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Trigger the flow and start listening for values.
-                // Note that this happens when lifecycle is STARTED and stops
-                // collecting when the lifecycle is STOPPED
                 viewModel.currencies.collect { currencies ->
                     adapter.submitList(currencies)
                 }

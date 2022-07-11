@@ -8,30 +8,43 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
-import javax.inject.Inject
+import io.reactivex.rxkotlin.subscribeBy
 import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val dataSource: CurrencyDataSource
-): ViewModel() {
+) : ViewModel() {
 
     private val _currencies = MutableStateFlow<List<Currency>>(emptyList())
-    val currencies : StateFlow<List<Currency>> get() = _currencies
+    val currencies = _currencies.asStateFlow()
 
     private val compositeDisposable = CompositeDisposable()
 
-    fun fetchCurrencies(){
+    fun fetchCurrencies() {
         dataSource.getAvailableBooks()
             .subscribeOn(Schedulers.io())
+            .toObservable().flatMapIterable {
+                return@flatMapIterable it
+            }.flatMap { book ->
+                return@flatMap dataSource.getCurrencyTicker(book.name)
+                    .toObservable().map {
+                        Currency(book.name, it.last)
+                    }
+            }
             .observeOn(AndroidSchedulers.mainThread())
-            .subscribe({
-                _currencies.value = it
-            },{
-                Log.i("TAG","${it.message}")
-            }).addTo(compositeDisposable)
+            .toList()
+            .subscribeBy(
+                onSuccess = {
+                    _currencies.value = it
+                },
+                onError = {
+                    Log.i("TAG","${it.message}")
+                }
+            ).addTo(compositeDisposable)
     }
 
     override fun onCleared() {

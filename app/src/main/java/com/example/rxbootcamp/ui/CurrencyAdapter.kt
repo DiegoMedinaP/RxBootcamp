@@ -8,24 +8,25 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.rxbootcamp.databinding.ItemCurrencyBinding
 import com.example.rxbootcamp.ui.model.Currency
 
-class BookAdapter : ListAdapter<Currency, BookAdapter.ViewHolder>(COMPARATOR) {
+class CurrencyAdapter(private val currencyClickListener: (currency :Currency) -> Unit) :
+    ListAdapter<Currency, CurrencyAdapter.ViewHolder>(COMPARATOR) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         return ViewHolder(
             ItemCurrencyBinding.inflate(
-                LayoutInflater.from(parent.context),parent,false
+                LayoutInflater.from(parent.context), parent, false
             )
         )
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position).book)
+        holder.bind(getItem(position))
     }
 
     companion object {
-        object COMPARATOR : DiffUtil.ItemCallback<Currency>(){
+        object COMPARATOR : DiffUtil.ItemCallback<Currency>() {
             override fun areItemsTheSame(oldItem: Currency, newItem: Currency): Boolean =
-                oldItem.book == newItem.book
+                oldItem.bookName == newItem.bookName
 
 
             override fun areContentsTheSame(oldItem: Currency, newItem: Currency): Boolean =
@@ -33,9 +34,12 @@ class BookAdapter : ListAdapter<Currency, BookAdapter.ViewHolder>(COMPARATOR) {
         }
     }
 
-    inner class ViewHolder(private val binding: ItemCurrencyBinding):RecyclerView.ViewHolder(binding.root){
-        fun bind(book:String){
-            binding.bookName.text = book
+    inner class ViewHolder(private val binding: ItemCurrencyBinding) :
+        RecyclerView.ViewHolder(binding.root) {
+        fun bind(currency: Currency) {
+            binding.bookName.text = currency.bookName
+            binding.bookPrice.text = currency.price
+            binding.root.setOnClickListener { currencyClickListener(currency) }
         }
     }
 }
