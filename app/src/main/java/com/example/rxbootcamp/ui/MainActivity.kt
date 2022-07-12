@@ -19,8 +19,8 @@ class MainActivity : AppCompatActivity() {
 
     private val viewModel : MainViewModel by viewModels()
     private val adapter : CurrencyAdapter by lazy {
-        CurrencyAdapter { currency ->
-            currencyClickListener(currency)
+        CurrencyAdapter { currency , position ->
+            currencyClickListener(currency, position)
         }
     }
 
@@ -38,7 +38,8 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun currencyClickListener(currency : Currency){
+    private fun currencyClickListener(currency : Currency, position:Int){
+        viewModel.fetchCurrencyPrice(currency.bookName,position)
         Toast.makeText(this, currency.bookName,Toast.LENGTH_SHORT).show()
     }
 

@@ -27,24 +27,34 @@ class MainViewModel @Inject constructor(
     fun fetchCurrencies() {
         dataSource.getAvailableBooks()
             .subscribeOn(Schedulers.io())
-            .toObservable().flatMapIterable {
-                return@flatMapIterable it
-            }.flatMap { book ->
-                return@flatMap dataSource.getCurrencyTicker(book.name)
-                    .toObservable().map {
-                        Currency(book.name, it.last)
-                    }
-            }
             .observeOn(AndroidSchedulers.mainThread())
-            .toList()
             .subscribeBy(
                 onSuccess = {
-                    _currencies.value = it
+                    val currencies = it.map { book -> Currency(book.name) }
+                    _currencies.value = currencies
                 },
                 onError = {
-                    Log.i("TAG","${it.message}")
+                    Log.i("TAG", "${it.message}")
                 }
             ).addTo(compositeDisposable)
+    }
+
+    fun fetchCurrencyPrice(book: String, currencyIndex: Int) {
+        compositeDisposable.add(
+            dataSource.getCurrencyTicker(book)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe({ ticker ->
+                    val currencies = _currencies.value.toMutableList()
+                    currencies[currencyIndex] = currencies[currencyIndex].copy(
+                        price = ticker.last
+                    )
+                    _currencies.value = currencies
+                }, {
+                    Log.i("TAG", "${it.message}")
+                }
+                )
+        )
     }
 
     override fun onCleared() {

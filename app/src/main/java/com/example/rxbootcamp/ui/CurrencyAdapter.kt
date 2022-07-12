@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.rxbootcamp.databinding.ItemCurrencyBinding
 import com.example.rxbootcamp.ui.model.Currency
 
-class CurrencyAdapter(private val currencyClickListener: (currency :Currency) -> Unit) :
+class CurrencyAdapter(private val currencyClickListener: (currency :Currency, position : Int) -> Unit) :
     ListAdapter<Currency, CurrencyAdapter.ViewHolder>(COMPARATOR) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -20,7 +20,7 @@ class CurrencyAdapter(private val currencyClickListener: (currency :Currency) ->
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        holder.bind(getItem(position))
+        holder.bind(getItem(position),position)
     }
 
     companion object {
@@ -36,10 +36,10 @@ class CurrencyAdapter(private val currencyClickListener: (currency :Currency) ->
 
     inner class ViewHolder(private val binding: ItemCurrencyBinding) :
         RecyclerView.ViewHolder(binding.root) {
-        fun bind(currency: Currency) {
+        fun bind(currency: Currency, position: Int) {
             binding.bookName.text = currency.bookName
             binding.bookPrice.text = currency.price
-            binding.root.setOnClickListener { currencyClickListener(currency) }
+            binding.root.setOnClickListener { currencyClickListener(currency, position) }
         }
     }
 }
