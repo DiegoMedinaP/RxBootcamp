@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import com.example.rxbootcamp.data.CurrencyDataSource
 import com.example.rxbootcamp.ui.model.Currency
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.reactivex.Scheduler
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.rxkotlin.addTo
@@ -27,19 +28,14 @@ class MainViewModel @Inject constructor(
     fun fetchCurrencies() {
         dataSource.getAvailableBooks()
             .subscribeOn(Schedulers.io())
-            .toObservable().flatMapIterable {
-                return@flatMapIterable it
-            }.flatMap { book ->
-                return@flatMap dataSource.getCurrencyTicker(book.name)
-                    .toObservable().map {
-                        Currency(book.name, it.last)
-                    }
-            }
             .observeOn(AndroidSchedulers.mainThread())
-            .toList()
             .subscribeBy(
                 onSuccess = {
-                    _currencies.value = it
+                    val currencies = arrayListOf<Currency>()
+                        it.forEach{ book ->
+                        currencies.add(Currency(book.name))
+                    }
+                    _currencies.value = currencies
                 },
                 onError = {
                     Log.i("TAG","${it.message}")
