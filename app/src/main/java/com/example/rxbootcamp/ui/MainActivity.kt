@@ -33,7 +33,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUp(){
-        viewModel.fetchCurrencies()
         binding.rvBooks.adapter = adapter
     }
 

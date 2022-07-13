@@ -15,41 +15,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
-    private val dataSource: CurrencyDataSource
-) : ViewModel() {
+class MainViewModel @Inject constructor() : ViewModel() {
 
     private val _currencies = MutableStateFlow<List<Currency>>(emptyList())
     val currencies = _currencies.asStateFlow()
 
-    private val compositeDisposable = CompositeDisposable()
-
-    fun fetchCurrencies() {
-        dataSource.getAvailableBooks()
-            .subscribeOn(Schedulers.io())
-            .toObservable().flatMapIterable {
-                return@flatMapIterable it
-            }.flatMap { book ->
-                return@flatMap dataSource.getCurrencyTicker(book.name)
-                    .toObservable().map {
-                        Currency(book.name, it.last)
-                    }
-            }
-            .observeOn(AndroidSchedulers.mainThread())
-            .toList()
-            .subscribeBy(
-                onSuccess = {
-                    _currencies.value = it
-                },
-                onError = {
-                    Log.i("TAG","${it.message}")
-                }
-            ).addTo(compositeDisposable)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        compositeDisposable.clear()
-    }
 
 }
