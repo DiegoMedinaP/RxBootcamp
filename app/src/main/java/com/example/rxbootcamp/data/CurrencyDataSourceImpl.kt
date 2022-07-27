@@ -10,13 +10,12 @@ class CurrencyDataSourceImpl @Inject constructor(
     private val currencyService: CurrencyService
 ) : CurrencyDataSource {
 
-    override fun getAvailableBooks(): Single<List<Book>> =
-        currencyService.getAvailableBooks().map {
-            it.currencies.toCurrenciesViewData().filter { book ->
+    override suspend fun getAvailableBooks(): List<Book> =
+        currencyService.getAvailableBooks().currencies.toCurrenciesViewData().filter { book ->
                 book.name.contains("_mxn")
             }
-        }
 
-    override fun getCurrencyTicker(book: String): Single<Ticker> =
-        currencyService.getCurrencyTicker(book).map { it.info.toTickerViewData() }
+
+    override suspend fun getCurrencyTicker(book: String): Ticker =
+        currencyService.getCurrencyTicker(book).info.toTickerViewData()
 }

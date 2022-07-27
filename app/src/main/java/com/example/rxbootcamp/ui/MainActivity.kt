@@ -33,7 +33,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setUp(){
+        viewModel.getCurrencies()
         binding.rvBooks.adapter = adapter
+        binding.btnFlow.setOnClickListener {
+            viewModel.doSomething()
+        }
     }
 
 
